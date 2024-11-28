@@ -57,6 +57,31 @@ void ClearColorBuffer(uint32_t color)
 	}
 }
 
+void DrawGrid(int size)
+{
+	for (int y = 0; y < windowHeight; y++)
+	{
+		for (int x = 0; x < windowWidth; x++)
+		{
+			if (x % size == 0 || y % size == 0)
+			{
+				colorBufferRGBA[(windowWidth * y) + x] = 0x000000FF;
+			}
+		}
+	}
+}
+
+void DrawDotGrid(int size)
+{
+	for (int y = 1; y <= windowHeight; y += 10)
+	{
+		for (int x = 1; x <= windowWidth; x += 10)
+		{
+			colorBufferRGBA[(windowWidth * y) + x] = 0x000000FF;
+		}
+	}
+}
+
 int main(int argc, char* args[])
 {
 	isRunning = InitializeWindow();
@@ -82,6 +107,8 @@ int main(int argc, char* args[])
 		// Render
 		SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
 		SDL_RenderClear(renderer);
+
+		DrawDotGrid(10);
 
 		RenderColorBuffer();
 		ClearColorBuffer(0xFFFFFFFF);
