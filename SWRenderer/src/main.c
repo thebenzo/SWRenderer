@@ -1,12 +1,19 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <SDL.h>
+
+const int windowWidth = 1280;
+const int windowHeight = 800;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
 
 bool isRunning = false;
+
+uint32_t* colorBufferRGBA = NULL;
+SDL_Texture* colorBufferTexture = NULL;
 
 bool InitializeWindow()
 {
@@ -16,7 +23,7 @@ bool InitializeWindow()
 		return false;
 	}
 
-	window = SDL_CreateWindow("Tiny Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 800, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("Tiny Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
 	if (!window)
 	{
 		fprintf(stderr, "Failed to create SDL Window. Error: %s\n", SDL_GetError());
@@ -33,9 +40,30 @@ bool InitializeWindow()
 	return true;
 }
 
+void RenderColorBuffer()
+{
+	SDL_UpdateTexture(colorBufferTexture, NULL, colorBufferRGBA, (int)(sizeof(uint32_t) * windowWidth));
+	SDL_RenderCopy(renderer, colorBufferTexture, NULL, NULL);
+}
+
+void ClearColorBuffer(uint32_t color)
+{
+	for (int y = 0; y < windowHeight; y++)
+	{
+		for (int x = 0; x < windowWidth; x++)
+		{
+			colorBufferRGBA[(windowWidth * y) + x] = color;
+		}
+	}
+}
+
 int main(int argc, char* args[])
 {
 	isRunning = InitializeWindow();
+
+	// Allocate and setup colorBuffer in the memory
+	colorBufferRGBA = (uint32_t*) malloc(sizeof(uint32_t) * windowWidth * windowHeight);
+	colorBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, windowWidth, windowHeight);
 
 	// Game Loop
 	while (isRunning)
@@ -55,8 +83,17 @@ int main(int argc, char* args[])
 		SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
 		SDL_RenderClear(renderer);
 
+		RenderColorBuffer();
+		ClearColorBuffer(0xFFFFFFFF);
+
 		SDL_RenderPresent(renderer);
 	}
+
+	// Cleanup allocated resources
+	free(colorBufferRGBA);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 
 	return 0;
 }
