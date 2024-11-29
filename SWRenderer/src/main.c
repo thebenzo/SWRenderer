@@ -82,6 +82,17 @@ void DrawDotGrid(int size)
 	}
 }
 
+void DrawFillRect(int x, int y, int w, int h, uint32_t fillColor)
+{
+	for (int i = y; i < (y + h); i++)
+	{
+		for (int j = x; j < (x + w); j++)
+		{
+			colorBufferRGBA[(windowWidth * i) + j] = fillColor;
+		}
+	}
+}
+
 int main(int argc, char* args[])
 {
 	isRunning = InitializeWindow();
@@ -109,6 +120,7 @@ int main(int argc, char* args[])
 		SDL_RenderClear(renderer);
 
 		DrawDotGrid(10);
+		DrawFillRect(100, 200, 500, 300, 0x4F7942FF);
 
 		RenderColorBuffer();
 		ClearColorBuffer(0xFFFFFFFF);
